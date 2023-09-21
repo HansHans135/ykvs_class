@@ -12,10 +12,9 @@ async def on_ready():
 
 @bot.event
 async def on_voice_state_update(member, before, after):
-
-    if before.channel is None and after.channel is not None and after.channel.id == 1148583730546491392:
+    if after.channel is not None and after.channel.id == 1148583730546491392:
         guild = member.guild
-        name = f"{member.name}"
+        name = member.name
         new_channel = await guild.create_voice_channel(name, category=after.channel.category)
         await member.move_to(new_channel)
         cl.append(new_channel.id)
