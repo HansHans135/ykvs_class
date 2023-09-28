@@ -3,7 +3,7 @@ import json
 
 with open ("setting.json","r")as f:
     setting=json.load(f)
-bot = discord.Bot()
+bot = discord.Bot(intents=discord.Intents.all())
 cl = []
 
 @bot.event
@@ -11,10 +11,16 @@ async def on_ready():
     print(bot.user)
 
 @bot.event
-async def on_message(msg):
+async def on_message(msg:discord.Message):
     if msg.author.id ==985775670661632000:
-        await msg.reply("吵屁喔包蛋")
-        await msg.delete()
+        if int(msg.content) <5:
+            await msg.reply("要講就講多一點")
+        elif int(msg.content) <10:
+            await msg.reply("喔是喔")
+        else:
+            await msg.reply("吵屁喔包蛋")
+            await msg.add_reaction("🥚")
+            await msg.add_reaction("⛔")
         
 @bot.event
 async def on_voice_state_update(member, before, after):
