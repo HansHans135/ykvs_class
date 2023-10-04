@@ -1,5 +1,6 @@
 import discord
 import json
+import asyncio
 
 with open ("setting.json","r")as f:
     setting=json.load(f)
@@ -14,14 +15,15 @@ async def on_ready():
 async def on_message(msg:discord.Message):
     if msg.author.id ==985775670661632000:
         if int(msg.content) <5:
-            await msg.reply("要講就講多一點")
+            m=await msg.reply("要講就講多一點")
         elif int(msg.content) <10:
-            await msg.reply("喔是喔")
+            m=await msg.reply("喔是喔")
         else:
-            await msg.reply("吵屁喔包蛋")
+            m=await msg.reply("吵屁喔包蛋")
             await msg.add_reaction("🥚")
             await msg.add_reaction("⛔")
-        
+        await asyncio.sleep(10)
+        await m.delete()
 @bot.event
 async def on_voice_state_update(member, before, after):
     if after.channel is not None and after.channel.id == 1148583730546491392:
