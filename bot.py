@@ -14,9 +14,9 @@ async def on_ready():
 @bot.event
 async def on_message(msg:discord.Message):
     if msg.author.id ==985775670661632000:
-        if int(msg.content) <5:
+        if len(msg.content) <5:
             m=await msg.reply("要講就講多一點")
-        elif int(msg.content) <10:
+        elif len(msg.content) <10:
             m=await msg.reply("喔是喔")
         else:
             m=await msg.reply("吵屁喔包蛋")
@@ -35,5 +35,13 @@ async def on_voice_state_update(member, before, after):
     elif before.channel is not None and before.channel.id in cl and len(before.channel.members) == 0:
         await before.channel.delete()
         cl.remove(before.channel.id)
+
+    vc_cls=bot.get_channel(1165519977437208616)
+    if after.channel is not None:
+        embed=discord.Embed(title="加入語音",description=f"<@{member.id}> 加入了 <#{after.channel.id}>",color=discord.Color.green())
+        await vc_cls.send(embed=embed)
+    elif before.channel is not None:
+        embed=discord.Embed(title="退出語音",description=f"<@{member.id}> 退出了 <#{before.channel.id}>",color=discord.Color.red())
+        await vc_cls.send(embed=embed)
 
 bot.run(setting["token"])
