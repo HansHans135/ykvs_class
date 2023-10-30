@@ -15,15 +15,21 @@ async def on_ready():
 async def on_message(msg:discord.Message):
     if msg.author.id ==985775670661632000:
         if len(msg.content) <5:
-            m=await msg.reply("要講就講多一點")
+            await msg.reply("要講就講多一點")
         elif len(msg.content) <10:
-            m=await msg.reply("喔是喔")
+            await msg.reply("喔是喔")
         else:
-            m=await msg.reply("吵屁喔包蛋")
+            await msg.reply("吵屁喔包蛋")
             await msg.add_reaction("🥚")
             await msg.add_reaction("⛔")
-        await asyncio.sleep(10)
-        await m.delete()
+
+@discord.message_command(name="刪除訊息")
+async def translate_command(ctx: discord.ApplicationContext, message: discord.Message):
+    if message.author.name==bot.user.name:
+        if message.content in ["要講就講多一點","喔是喔","吵屁喔包蛋"]:
+            await message.delete()
+            await ctx.respond("done",ephemeral=True)
+
 @bot.event
 async def on_voice_state_update(member, before, after):
     if after.channel is not None and after.channel.id == 1148583730546491392:
