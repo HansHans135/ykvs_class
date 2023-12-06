@@ -1,6 +1,7 @@
 import discord
 import json
 import asyncio
+from datetime import datetime,timezone,timedelta
 
 with open ("setting.json","r")as f:
     setting=json.load(f)
@@ -24,11 +25,56 @@ async def on_message(msg:discord.Message):
             await msg.add_reaction("⛔")
 
 @discord.message_command(name="刪除訊息")
-async def translate_command(ctx: discord.ApplicationContext, message: discord.Message):
+async def dle(ctx: discord.ApplicationContext, message: discord.Message):
     if message.author.name==bot.user.name:
         if message.content in ["要講就講多一點","喔是喔","吵屁喔包蛋"]:
             await message.delete()
             await ctx.respond("done",ephemeral=True)
+
+@bot.slash_command(description="修改錢錢")
+async def edit(ctx:discord.ApplicationContext,user:discord.Member,title:str,money:int):
+    if ctx.user.id !=851062442330816522:
+        await ctx.respond("還想偷改阿細狗")
+        return
+    
+    with open("money.json","r")as f:
+        data=json.load(f)
+    try:
+        data[str(user.id)]+=money
+    except:
+        data[str(user.id)]=money
+    with open("money.json","w+")as f:
+        json.dump(data,f)
+
+    dt1 = datetime.utcnow().replace(tzinfo=timezone.utc)
+    dt2 = dt1.astimezone(timezone(timedelta(hours=8)))
+    now = dt2.strftime("%Y-%m-%d %H:%M:%S")
+    with open(f"money/{user.id}","a+")as f:
+        f.write(f"{now} | {title} {money}$\n")
+    await ctx.respond(f"{now} | {title} {money}$",ephemeral=True)
+
+@bot.slash_command(description="查看錢錢紀錄")
+async def money(ctx:discord.ApplicationContext,user:discord.Member):
+    with open(f"money/{user.id}","r")as f:
+        text=f.read()
+    with open("money.json","r")as f:
+        data=json.load(f)
+    embed=discord.Embed(title=f"{user.name}的紀錄",description=text)
+    embed.set_footer(text=f"所以他還欠 {data[str(user.id)]}$")
+    await ctx.respond(embed=embed)
+
+@bot.slash_command(description="查看錢錢列表")
+async def list(ctx:discord.ApplicationContext):
+    with open("money.json","r")as f:
+        data=json.load(f)
+    text=""
+    num=0
+    for i in data :
+        text+=f"<@{i}> : {data[i]}$\n"
+        num+=data[i]
+    embed=discord.Embed(title=f"所有欠錢的人",description=text)
+    embed.set_footer(text=f"所以總共有 {num}$ 要收款")
+    await ctx.respond(embed=embed)
 
 @bot.event
 async def on_voice_state_update(member, before, after):
