@@ -7,7 +7,7 @@ with open ("setting.json","r")as f:
     setting=json.load(f)
 bot = discord.Bot(intents=discord.Intents.all())
 cl = []
-
+user_ls=[]
 @bot.event
 async def on_ready():
     print(bot.user)
@@ -48,7 +48,7 @@ async def edit(ctx:discord.ApplicationContext,user:discord.Member,title:str,mone
 
     dt1 = datetime.utcnow().replace(tzinfo=timezone.utc)
     dt2 = dt1.astimezone(timezone(timedelta(hours=8)))
-    now = dt2.strftime("%Y-%m-%d %H:%M:%S")
+    now = dt2.strftime("%Y-%m-%d")
     with open(f"money/{user.id}","a+")as f:
         f.write(f"{now} | {title} {money}$\n")
     await ctx.respond(f"{now} | {title} {money}$",ephemeral=True)
@@ -70,8 +70,9 @@ async def list(ctx:discord.ApplicationContext):
     text=""
     num=0
     for i in data :
-        text+=f"<@{i}> : {data[i]}$\n"
-        num+=data[i]
+        if data[i]!=0:
+            text+=f"<@{i}> : {data[i]}$\n"
+            num+=data[i]
     embed=discord.Embed(title=f"所有欠錢的人",description=text)
     embed.set_footer(text=f"所以總共有 {num}$ 要收款")
     await ctx.respond(embed=embed)
@@ -89,10 +90,13 @@ async def on_voice_state_update(member, before, after):
         cl.remove(before.channel.id)
 
     vc_cls=bot.get_channel(1165519977437208616)
-    if after.channel is not None:
-        embed=discord.Embed(title="加入語音",description=f"<@{member.id}> 加入了 <#{after.channel.id}>",color=discord.Color.green())
-        await vc_cls.send(embed=embed)
-    elif before.channel is not None:
+    if after.channel:
+        if before.channel!=after.channel and member.id not in user_ls:
+            user_ls.append(member.id)
+            embed=discord.Embed(title="加入語音",description=f"<@{member.id}> 加入了 <#{after.channel.id}>",color=discord.Color.green())
+            await vc_cls.send(embed=embed)
+    elif before.channel:
+        user_ls.remove(member.id)
         embed=discord.Embed(title="退出語音",description=f"<@{member.id}> 退出了 <#{before.channel.id}>",color=discord.Color.red())
         await vc_cls.send(embed=embed)
 
