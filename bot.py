@@ -2,15 +2,52 @@ import discord
 import json
 import asyncio
 from datetime import datetime,timezone,timedelta
+from discord.ext import commands
 
 with open ("setting.json","r")as f:
     setting=json.load(f)
-bot = discord.Bot(intents=discord.Intents.all())
+
 cl = []
 user_ls=[]
-@bot.event
-async def on_ready():
-    print(bot.user)
+
+class PersistentViewBot(commands.Bot):
+    def __init__(self):
+        super().__init__(
+            command_prefix=commands.when_mentioned_or("!"),intents=discord.Intents.all()
+        )
+        self.persistent_views_added = False
+
+    async def on_ready(self):
+        if not self.persistent_views_added:
+            self.add_view(yn())
+            self.persistent_views_added = True
+
+        print(f"Logged in as {self.user} (ID: {self.user.id})")
+        print("------")
+bot=PersistentViewBot()
+
+class yn(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="重新整理",
+        style=discord.ButtonStyle.gray,
+        custom_id="awa:yes",
+    )
+    async def green(self, button: discord.ui.Button, interaction: discord.Interaction):
+        with open("money.json","r")as f:
+            data=json.load(f)
+        text=""
+        num=0
+        for i in data :
+            if data[i]!=0:
+                text+=f"<@{i}> : {data[i]}$\n"
+                num+=data[i]
+        embed=discord.Embed(title=f"所有欠錢的人",description=text)
+        embed.set_footer(text=f"所以總共有 {num}$ 要收款")
+        await interaction.response.edit_message(embed=embed)
+
 
 @bot.event
 async def on_message(msg:discord.Message):
@@ -75,7 +112,7 @@ async def list(ctx:discord.ApplicationContext):
             num+=data[i]
     embed=discord.Embed(title=f"所有欠錢的人",description=text)
     embed.set_footer(text=f"所以總共有 {num}$ 要收款")
-    await ctx.respond(embed=embed)
+    await ctx.respond(embed=embed, view=yn())
 
 @bot.event
 async def on_voice_state_update(member, before, after):
