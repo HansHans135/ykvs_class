@@ -47,6 +47,20 @@ class yn(discord.ui.View):
         embed=discord.Embed(title=f"所有欠錢的人",description=text)
         embed.set_footer(text=f"所以總共有 {num}$ 要收款")
         await interaction.response.edit_message(embed=embed)
+    @discord.ui.button(
+        label="查看紀錄",
+        style=discord.ButtonStyle.gray,
+        custom_id="awa:log",
+    )
+    async def log(self, button: discord.ui.Button, interaction: discord.Interaction):
+        user=interaction.user
+        with open(f"money/{user.id}","r")as f:
+            text=f.read()
+        with open("money.json","r")as f:
+            data=json.load(f)
+        embed=discord.Embed(title=f"你的紀錄",description=text)
+        embed.set_footer(text=f"所以你還還欠 {data[str(user.id)]}$")
+        await interaction.response.send_message(embed=embed,ephemeral=True)
 
 
 @bot.event
