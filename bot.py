@@ -39,13 +39,15 @@ class yn(discord.ui.View):
         with open("money.json","r")as f:
             data=json.load(f)
         text=""
-        num=0
-        for i in data :
-            if data[i]!=0:
-                text+=f"<@{i}> : {data[i]}$\n"
-                num+=data[i]
+        num=1
+        sorted_data = sorted(data.items(), key=lambda x: x[1], reverse=True)
+        for i, (player_id, score) in enumerate(sorted_data, start=1):
+            if score!=0:
+                text+=f"榜{num}. <@{player_id}>：{score}$\n"
+                num+=1
+
         embed=discord.Embed(title=f"所有欠錢的人",description=text)
-        embed.set_footer(text=f"所以總共有 {num}$ 要收款")
+        embed.set_footer(text=f"所以總共有 {sum(data.values())}$ 要收款")
         await interaction.response.edit_message(embed=embed)
     @discord.ui.button(
         label="查看紀錄",
@@ -116,16 +118,7 @@ async def money(ctx:discord.ApplicationContext,user:discord.Member):
 
 @bot.slash_command(description="查看錢錢列表")
 async def list(ctx:discord.ApplicationContext):
-    with open("money.json","r")as f:
-        data=json.load(f)
-    text=""
-    num=0
-    for i in data :
-        if data[i]!=0:
-            text+=f"<@{i}> : {data[i]}$\n"
-            num+=data[i]
-    embed=discord.Embed(title=f"所有欠錢的人",description=text)
-    embed.set_footer(text=f"所以總共有 {num}$ 要收款")
+    embed=discord.Embed(title=f"所有欠錢的人",description="重整一下吧")
     await ctx.respond(embed=embed, view=yn())
 
 @bot.event
